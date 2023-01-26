@@ -30,6 +30,7 @@ library(grid)
 library(modelsummary)
 library(scales)
 library(ggcorrplot)
+library(forecast)
 
 options(scipen=999)
 ```
@@ -70,6 +71,8 @@ df <- df %>%
 ```{r}
 ## save final df
 df <-  df[, c('HourlyWage', 'age', 'agesq', 'agecu', 'sex', 'marital', 'edu_high', 'edu_mid', 'edu_low')]
+
+df <- na.omit(df)
 ```
 
 ```{r}
@@ -87,4 +90,48 @@ reg3 <- lm(model3, data=df)
 reg4 <- lm(model4, data=df)
 ```
 
+```{r}
+reg1$coefficients
+summary(reg1, vcov = 'sandwich')
+
+logLik(reg1)
+
+# Find AIC and BIC from the data
+2*(reg1$rank+1) - 2*logLik(reg1)
+AIC(reg1)
+
+# BIC = k*ln(n) - 2*2*(max value of the likelihood function)
+(reg1$rank+1)*log(nrow(df)) - 2*logLik(reg1)
+BIC(reg1)
+```
+
+```{r}
+# evaluation of the models
+
+models <- c("reg1", "reg2","reg3", "reg4")
+AIC <- c()
+BIC <- c()
+RMSE <- c()
+RSquared <- c()
+regr <- c()
+k <- c()
+
+for ( i in 1:length(models)){
+  AIC[i] <- AIC(get(models[i]))
+  BIC[i] <- BIC(get(models[i]))
+  RMSE[i] <- RMSE(predict(get(models[i])), get(models[i])$model$HourlyWage)
+  RSquared[i] <-summary(get(models[i]))$r.squared
+  regr[[i]] <- coeftest(get(models[i]), vcov = sandwich)
+  k[i] <- get(models[i])$rank -1
+}
+```
+
+```{r}
+# Lowess vs. quadratic (reg1) regression
+eval <- data.frame(models, k, RSquared, RMSE, BIC)
+
+eval <- eval %>%
+  mutate(models = paste0("(",gsub("reg","",models),")")) %>%
+  rename(Model = models, "R-squared" = RSquared, "Training RMSE" = RMSE, "N predictors" = k)
+```
 
