@@ -8,11 +8,14 @@ output:
 date: "2023-01-26"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
+```{r}
 # Clean environment
 rm(list=ls())
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 
 # Load packages
 library(ggplot2)
@@ -26,7 +29,9 @@ library(caret)
 library(grid)
 library(modelsummary)
 library(scales)
+library(ggcorrplot)
 
+options(scipen=999)
 ```
 
 ```{r }
@@ -39,7 +44,47 @@ df <-  read.csv( 'https://osf.io/4ay9x/download')
 df <-  df[df$occ2012  == '3850' ,]
 ```
 
+```{r }
+## predictors selection
+df <-  df[, c('weight','earnwke', 'uhours', 'age', 'sex', 'marital','grade92')]
+```
 
+```{r }
+## change weekly wage into hourly wage
+df$HourlyWage <- (df$earnwke/df$uhours)
 
+# age: quadratic, cubic
+df <- df %>%
+  mutate(agesq = age^2,
+         agecu = age^3)
+```
+
+```{r}
+## categorize education level
+df <- df %>%
+  mutate(edu_high = ifelse(grade92 > 42, 1,0),
+         edu_mid = ifelse(grade92 >38 & grade92 < 43, 1,0),
+         edu_low = ifelse(grade92 < 39, 1,0))
+```
+
+```{r}
+## save final df
+df <-  df[, c('HourlyWage', 'age', 'agesq', 'agecu', 'sex', 'marital', 'edu_high', 'edu_mid', 'edu_low')]
+```
+
+```{r}
+# Model 1: Linear regression on age
+model1 <- as.formula(HourlyWage ~ age + agesq)
+
+# Models 2-4: Multiple linear regressions
+model2 <- as.formula(HourlyWage ~ age + agesq + sex)
+model3 <- as.formula(HourlyWage ~ age + agesq + sex + marital)
+model4 <- as.formula(HourlyWage ~ age + agesq + sex + marital + edu_high + edu_mid + edu_low)
+
+reg1 <- lm(model1, data=df)
+reg2 <- lm(model2, data=df)
+reg3 <- lm(model3, data=df)
+reg4 <- lm(model4, data=df)
+```
 
 
