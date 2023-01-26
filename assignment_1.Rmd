@@ -1,0 +1,45 @@
+---
+title: "assignment_1"
+author: "Hugo TING"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+date: "2023-01-26"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Clean environment
+rm(list=ls())
+
+# Load packages
+library(ggplot2)
+library(RCurl)
+library(tidyverse)
+library(lmtest)
+library(sandwich)
+library(haven)
+library(stargazer)
+library(caret)
+library(grid)
+library(modelsummary)
+library(scales)
+
+```
+
+```{r }
+## Loading the data from the web 
+df <-  read.csv( 'https://osf.io/4ay9x/download')
+```
+
+```{r }
+## Selected occupation as "Police Officer" (code = 3850)
+df <-  df[df$occ2012  == '3850' ,]
+```
+
+
+
+
+
