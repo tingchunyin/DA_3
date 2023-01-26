@@ -75,6 +75,46 @@ df <-  df[, c('HourlyWage', 'age', 'agesq', 'agecu', 'sex', 'marital', 'edu_high
 df <- na.omit(df)
 ```
 
+
+# ggplot1 (lv-lv)
+```{r}
+ggplot(df, aes(x=age, y=HourlyWage)) +
+  geom_smooth(se=FALSE) + 
+  theme_bw() + 
+  labs(x = "age", y = "Hourly Wage") +
+  theme(plot.title = element_text(size = rel(1)))
+```
+
+# ggplot2  (lg - lv)
+```{r}
+# let see is log the wage will change anything
+ggplot(df, aes(x=age)) +
+  geom_smooth(aes(y = log(HourlyWage)), se=FALSE) + 
+  theme_bw() +
+  labs(x = "age", y = "ln(Hourly Wage)") +
+  theme(plot.title = element_text(size = rel(1)))
+```
+
+
+# ggplot3  (lv - lg)
+```{r}
+ggplot(df, aes(x=log(age), y=HourlyWage)) +
+  geom_smooth(se=FALSE) + 
+  theme_bw() + 
+  labs(x = "ln(age)", y = "Hourly Wage") +
+  theme(plot.title = element_text(size = rel(1)))
+```
+
+
+# ggplot4  (lg - lg)
+```{r}
+ggplot(df, aes(x=log(age))) +
+  geom_smooth(aes(y = log(HourlyWage)), se=FALSE) + 
+  theme_bw() +
+  labs(x = "ln(age)", y = "ln(Hourly Wage)") +
+  theme(plot.title = element_text(size = rel(1)))
+```
+
 ```{r}
 # Model 1: Linear regression on age
 model1 <- as.formula(HourlyWage ~ age + agesq)
@@ -172,8 +212,11 @@ cv_mat <- data.frame(rbind(cv1$resample[4], "Average"),
            rbind(cv4$resample[1], rmse_cv[4]))
 
 colnames(cv_mat)<-c("Resample","Model1", "Model2", "Model3", "Model4")
-cv_mat
+cv_mat <- round(cv_mat, digits = 3)
 ```
 
+```{r}
+
+```
 
 
